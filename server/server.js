@@ -27,19 +27,6 @@ app.post('/todos',(req,res)=>{
 	});
 });
 
-app.post('/users',(req,res)=>{
-	// console.log(req.body);
-	var user = new User({
-		email: req.body.email
-	});
-
-	user.save().then((doc)=>{
-		res.send(doc);
-	},(err)=>{
-		res.status(400).send(err);
-	});
-});
-
 //GET /todos/abc123
 app.get('/todos',(req,res)=>{
 	Todo.find().then((todos)=>{
@@ -125,6 +112,23 @@ app.patch('/todos/:id',(req,res)=>{
 		res.status(400).send('Unable to update');
 	});
 
+});
+
+// POST/users
+
+app.post('/users',(req,res)=>{
+	// console.log(req.body);
+	var body=_.pick(req.body,['email','password']);
+	var user = new User(body);
+
+	user.save().then(()=>{
+		// res.send(user);
+		return user.generateAuthToken();
+	}).then((token)=>{
+		res.header('x-auth',token).send(user);
+	},(err)=>{
+		res.status(400).send(err);
+	});
 });
 
 app.listen(port,()=>{
