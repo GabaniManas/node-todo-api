@@ -8,10 +8,12 @@ var authenticate = (req,res,next)=>{
 			// res.status(401).send()
 		}
 		// res.send(user);
+		// console.log('OK');
 		req.user = user;
 		req.token = token;
 		next();
 	},(e)=>{
+		// console.log('Error :(');
 		res.status(401).send('Authentication rejected');
 	});
 };
