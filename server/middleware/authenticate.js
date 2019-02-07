@@ -13,7 +13,7 @@ var authenticate = (req,res,next)=>{
 		req.token = token;
 		next();
 	},(e)=>{
-		// console.log('Error :(');
+		console.log('Error :(',e);
 		res.status(401).send('Authentication rejected');
 	});
 };

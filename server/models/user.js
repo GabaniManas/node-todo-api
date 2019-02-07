@@ -74,13 +74,14 @@ UserSchema.statics.findByToken=function(token){
 	var decoded;
 
 	try{
+		console.log('Till here its great');
 		decoded = jwt.verify(token,'abc123');
-		// console.log(decoded);
+		console.log(decoded);
 	} catch(e){
 		// return new Promise((resolve,reject)=>{
 		// 	reject();
 		// });
-
+		console.log('Here',e);
 		return Promise.reject();
 	}
 	return User.findOne({
