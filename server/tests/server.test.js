@@ -177,7 +177,7 @@ describe('PATCH /todos/:id',()=>{
 		// status 200
 		// text is changed, completed false, completedAt is null .toNotExist()
 		var hexID = todos[1]._id.toHexString();
-		var text = 'This is another task';
+		var text = 'This is next task';
 		request(app)
 		.patch(`/todos/${hexID}`)
 		.expect(200)
