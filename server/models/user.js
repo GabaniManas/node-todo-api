@@ -67,7 +67,7 @@ UserSchema.methods.generateAuthToken = function () {
 
 	// })  
 	// chaining a promise
-} // as arrow funtion do not bind this keyword
+}; // as arrow funtion do not bind this keyword
 
 UserSchema.statics.findByToken=function(token){
 	var User = this;
@@ -108,7 +108,17 @@ UserSchema.statics.findByCredentials = function(email,password){
 			});
 		});
 	});
-}
+};
+
+UserSchema.methods.removeToken = function(token){
+	// $pull - lets you toremove items from array that match certain criteria
+	var user = this;
+	return user.update({
+		$pull:{
+			tokens:{token}
+		}
+	});
+};
 
 UserSchema.pre('save',function(next){
 	var user=this;
