@@ -233,6 +233,7 @@ describe('PATCH /todos/:id',()=>{
 		var text = 'This is next task';
 		request(app)
 		.patch(`/todos/${hexID}`)
+		.set('x-auth',users[1].tokens[0].token)
 		.expect(200)
 		.send({
 			completed:false,
