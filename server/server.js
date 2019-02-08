@@ -15,10 +15,11 @@ const port = process.env.PORT || 3000;
 
 app.use(bodyParser.json()); // use middleWare
 
-app.post('/todos',(req,res)=>{
+app.post('/todos',authenticate,(req,res)=>{
 	// console.log(req.body);
 	var todo = new Todo({
-		text: req.body.text
+		text: req.body.text,
+		_creator: req.user._id
 	});
 
 	todo.save().then((doc)=>{
@@ -29,8 +30,10 @@ app.post('/todos',(req,res)=>{
 });
 
 //GET /todos/abc123
-app.get('/todos',(req,res)=>{
-	Todo.find().then((todos)=>{
+app.get('/todos',authenticate,(req,res)=>{
+	Todo.find({
+		_creator: req.user._id
+	}).then((todos)=>{
 		res.send(todos);
 	},(e)=>{
 		res.status(400).send(e);
@@ -46,7 +49,7 @@ app.get('/users',(req,res)=>{
 });
 
 // GET/todos/123456 - someid to be queried
-app.get('/todos/:id',(req,res)=>{
+app.get('/todos/:id',authenticate,(req,res)=>{
 	// res.send(req.params);//req.params is an object with key-value pair where key is the url parameter and the value is the actual value in the url
 	var id=req.params.id;
 	// valid id using isValid
@@ -58,7 +61,10 @@ app.get('/todos/:id',(req,res)=>{
 		// error
 			// 400 - and send empty body back
 	if(ObjectID.isValid(id)){
-		Todo.findById(id).then((todo)=>{
+		Todo.findOne({
+			_id:id,
+			creator: req.user._id
+		}).then((todo)=>{
 			if(!todo){
 				return res.status(404).send('No such todo found'); // send({})
 			}
@@ -71,7 +77,7 @@ app.get('/todos/:id',(req,res)=>{
 	}
 });
 
-app.delete('/todos/:id',(req,res)=>{
+app.delete('/todos/:id',authenticate,(req,res)=>{
 	// get the id
 	// validate the id , if not valid .. return 404
 	// remove todo by id
@@ -84,7 +90,10 @@ app.delete('/todos/:id',(req,res)=>{
 	if(!ObjectID.isValid(id)){
 		res.status(404).send('Key Invalid');
 	} else {
-		Todo.findByIdAndRemove(id).then((todo)=>{
+		Todo.findOneAndRemove({
+			_id:id,
+			_creator:req.user._id
+		}).then((todo)=>{
 			if(!todo){
 				return res.status(404).send('No such todo found'); // send({})
 			}
@@ -95,7 +104,7 @@ app.delete('/todos/:id',(req,res)=>{
 	}
 });
 
-app.patch('/todos/:id',(req,res)=>{
+app.patch('/todos/:id',authenticate,(req,res)=>{
 	var id = req.params.id;
 	var body =_.pick(req.body,['text','completed']);
 	if(!ObjectID.isValid(id)){
@@ -107,7 +116,7 @@ app.patch('/todos/:id',(req,res)=>{
 		body.completed = false;
 		body.completedAt = null;
 	}
-	Todo.findByIdAndUpdate(id,{$set:body},{new:true}).then((todo)=>{
+	Todo.findOneAndUpdate({_id:id,_creator:req.body._id},{$set:body},{new:true}).then((todo)=>{
 		res.send({todo});
 	},(e)=>{
 		res.status(400).send('Unable to update');
@@ -166,7 +175,7 @@ app.delete('/users/me/token',authenticate,(req,res)=>{
 		res.status(200).send();
 	},()=>{
 		res.status(400).send();
-	});
+	}); 
 });
 
 app.listen(port,()=>{
